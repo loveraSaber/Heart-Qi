@@ -1,0 +1,142 @@
+code_root_dir: /vdb/code
+data_root_dir: /vdb/datasets/processed_10s
+
+checkpoint:
+  save_top_k: 1
+data:
+  modality: single
+  use_audio_normalise: false
+  max_frames: 5000
+  max_frames_val: 5000
+  dataset:
+    root: ${data_root_dir}
+    label_dir: label/
+    train_file: train.csv
+    val_file: val.csv
+    test_file: train.csv
+  max_length: 5000
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  log_model: true
+  name: ${exp_name}
+  offline: false
+  project: auto_avsr
+  mode: online
+  entity: null
+model: single_modal
+backbone:
+  scale_feature: 2
+  modal_num: 1
+  mel:
+    label: False
+    feature_dim: 80
+    max_seq_len: 50000
+    reduction_factors: [2,2,2]
+    encoder:
+      hidden_size: 768                
+      num_hidden_layers: 6             
+      num_attention_heads: 4             
+      intermediate_size: 256  
+      hidden_dropout_prob: 0.2           
+      attention_probs_dropout_prob: 0.1  
+      activation: swish
+      normalize_before: False
+      concat_after: False
+      macaron_style: False
+      initializer_range: 0.02              
+      max_position_length: 50000
+    label_prediction:
+      input_dim: 128
+      middle_dim: 256
+      kernel_size: 5
+      dropout_prob: 0.2
+      pool_middle_dim: 40
+  video:
+    label: True
+    feature_dim: 768
+    max_seq_len: 50000
+    encoder:
+      hidden_size: 64          
+      num_hidden_layers: 6             
+      num_attention_heads: 2             
+      intermediate_size: 256  
+      hidden_dropout_prob: 0.2           
+      attention_probs_dropout_prob: 0.1   
+      activation: swish
+      normalize_before: False
+      concat_after: False
+      macaron_style: False
+      initializer_range: 0.02            
+      max_position_length: 50000
+    label_prediction:
+      input_dim: 64
+      middle_dim: 256
+      kernel_size: 11
+      dropout_prob: 0.2
+      pool_middle_dim: 64
+  phoneme:
+    label: False
+    feature_dim: 1
+    max_seq_len: 50000
+    vocab_size: 500
+    encoder:
+      hidden_size: 128                
+      num_hidden_layers: 6             
+      num_attention_heads: 4             
+      intermediate_size: 256  
+      hidden_dropout_prob: 0.2           
+      attention_probs_dropout_prob: 0.1   
+      activation: swish
+      normalize_before: False
+      concat_after: False
+      macaron_style: False
+      initializer_range: 0.02            
+      max_position_length: 50000
+    label_prediction:
+      input_dim: 128
+      middle_dim: 256
+      kernel_size: 3
+      dropout_prob: 0.2
+      pool_middle_dim: 64
+optimizer:
+  name: adamw
+  lr: 0.0001
+  warmup_epochs: 2
+  weight_decay: 0.03
+  betas:
+  - 0.9
+  - 0.98
+trainer:
+  precision: 32
+  max_epochs: 75
+  num_nodes: 1
+  accelerator: gpu
+  devices: -1
+  sync_batchnorm: true
+  default_root_dir: exp/
+  num_sanity_val_steps: 0
+  limit_val_batches: 1.0
+  accumulate_grad_batches: 1
+  gradient_clip_val: 5.0
+  replace_sampler_ddp: false
+  resume_from_checkpoint: null
+decode:
+  name: default
+  snr_target: 999999
+
+exp_dir: ${code_root_dir}/exp/
+exp_name: test-STAI/
+num_workers: 8
+gpus: 
+slurm_job_id: 1
+train: false
+log_wandb: false
+transfer_frontend: false
+remove_ctc: false
+infer_path:
+ckpt_path: 
+scale_type: STAI
+infer_ckpt_path: /vdb/Single-visual/module/video_ckpt/BPS/last.ckpt
+filelist_csv: /vdb/processed_data/processed_data_lightning/label/test.csv
+result_dir: /vdb/ckpt_mel/result/${scale_type}.xlsx
+device: 'cuda:0'
