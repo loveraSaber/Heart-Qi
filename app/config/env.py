@@ -80,6 +80,10 @@ class RedisSettings(BaseSettings):
     redis_port: int = 6379
     redis_username: str = ''
     redis_password: str = ''
+    redis_db_broker:int=0
+    redis_db_backend:int=1
+    redis_db:int=2
+
 
 class UploadSettings:
     """
@@ -190,8 +194,8 @@ class GetConfig:
         """
         解析命令行参数
         """
-        if 'uvicorn' in sys.argv[0]:
-            # 使用uvicorn启动时，命令行参数需要按照uvicorn的文档进行配置，无法自定义参数
+        if 'uvicorn' in sys.argv[0] or 'celery' in sys.argv[0]:
+            # uvicorn 和 celery 启动时都跳过 argparse
             pass
         else:
             # 使用argparse定义命令行参数

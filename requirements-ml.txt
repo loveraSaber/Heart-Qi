@@ -1,4 +1,0 @@
-# PyTorch 相关（单独安装以便调试）
-torch==2.1.1
-torchvision==0.16.1
-transformers==4.35.0
