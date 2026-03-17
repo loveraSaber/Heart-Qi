@@ -27,15 +27,15 @@ class ModelSettings(BaseSettings):
     """
     模型配置
     """
-    vit_base_patch: str = '/app/app/src/vit-base-patch16-224'
-    BPS_Model_path: str = '/app/app/src/model_ckpt/BPS/last.ckpt'
-    CPSS_Model_path: str = '/app/app/src/model_ckpt/CPSS/last-v2.ckpt'
-    PHQ_Model_path: str = '/app/app/src/model_ckpt/PHQ/last.ckpt'
-    STAI_Model_path: str = '/app/app/src/model_ckpt/STAI/last.ckpt'
-    BPS_Config_path: str = '/app/app/core/configs/model_config/BPS.yaml'
-    CPSS_Config_path: str = '/app/app/core/configs/model_config/CPSS.yaml'
-    PHQ_Config_path: str = '/app/app/core/configs/model_config/PHQ.yaml'
-    STAI_Config_path: str = '/app/app/core/configs/model_config/STAI.yaml'
+    vit_base_patch: str = 'src/vit-base-patch16-224'
+    BPS_Model_path: str = 'src/model_ckpt/BPS/last.ckpt'
+    CPSS_Model_path: str = 'src/model_ckpt/CPSS/last-v2.ckpt'
+    PHQ_Model_path: str = 'src/model_ckpt/PHQ/last.ckpt'
+    STAI_Model_path: str = 'src/model_ckpt/STAI/last.ckpt'
+    BPS_Config_path: str = 'app/config/model_config/BPS.yaml'
+    CPSS_Config_path: str = 'app/config/model_config/CPSS.yaml'
+    PHQ_Config_path: str = 'app/config/model_config/PHQ.yaml'
+    STAI_Config_path: str = 'app/config/model_config/STAI.yaml'
     
     model_device: Literal['cpu', 'cuda'] = 'cuda'
     batch_size: int = 32

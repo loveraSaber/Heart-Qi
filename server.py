@@ -1,7 +1,13 @@
 from contextlib import asynccontextmanager
+
+from contextlib import asynccontextmanager
+# ======== Numpy 2.0 向后兼容补丁已移除 ========
+# ========================================
+
 from fastapi import FastAPI
 from app.config.env import AppConfig
 from app.api.emotion_controller import emotionController
+from app.api.feat_controller import featController
 from app.api.websocket_handler import websocketRouter
 from app.models.model_factory import ModelFactory
 from app.models.registry import ModelRegistry
@@ -13,13 +19,13 @@ async def lifespan(app: FastAPI):
     cpss_model = ModelFactory.create_model('CPSS')
     phq_model = ModelFactory.create_model('PHQ')
     stai_model = ModelFactory.create_model('STAI')
-    feat_detector = ModelFactory.create_model('Feat')
+ #   feat_detector = ModelFactory.create_model('Feat')
     
     ModelRegistry.register('preprocess', preprocess)
     ModelRegistry.register("CPSS", cpss_model)
     ModelRegistry.register("PHQ", phq_model)
     ModelRegistry.register("STAI", stai_model)
-    ModelRegistry.register("Feat", feat_detector)
+  #  ModelRegistry.register("Feat", feat_detector)
 
     yield    
     print("System shutdown...")
@@ -34,6 +40,7 @@ app = FastAPI(
 # 注册 HTTP 路由
 controller_list = [
     {'router': emotionController, 'tags': ['情感处理模块']},
+    {'router': featController, 'tags': ['特征检测模块']},
 ]
 
 for controller in controller_list:

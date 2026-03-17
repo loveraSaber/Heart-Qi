@@ -1,0 +1,33 @@
+# 指定 PyTorch 官方源，用于下载 GPU (CUDA) 版本的深度学习框架
+--extra-index-url https://download.pytorch.org/whl/cu118
+
+# 基础 Web 框架
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# 数据处理
+numpy==1.24.3
+pandas==2.1.1
+scipy==1.11.4
+
+# 任务队列
+celery==5.3.4
+redis==5.0.1
+
+# 配置和工具
+pyyaml==6.0.1
+python-dotenv==1.0.0
+python-multipart==0.0.6
+requests==2.31.0
+
+# 深度学习核心 (指定 cu118 代表 CUDA 11.8 版本，与 Python 3.10 兼容性最好)
+torch==2.1.1+cu118
+torchvision==0.16.1+cu118
+transformers==4.35.0
+
+# 计算机视觉与特征提取
+#opencv-python==4.8.1.78
+#batch-face==1.5.0
+#py-feat==0.6.2
