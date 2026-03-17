@@ -3,7 +3,7 @@ from celery import current_task
 from app.core.celery_app import celery_app
 from app.models.registry import ModelRegistry
 import redis
-
+import json
 # 从环境变量读取Redis配置，支持Docker容器
 redis_host = os.getenv('REDIS_HOST', 'localhost')
 redis_port = int(os.getenv('REDIS_PORT', '6379'))
@@ -36,17 +36,17 @@ def feat_detect_task(self, input_path: str, output_path: str, task_id: str):
             input_path=input_path,
             output_path=output_dir,
             skip_frames=5,
-            num_workers=4,
+            num_workers=0,#Celery worker 是守护进程，detect_video 里用了 num_workers=4 开多进程 DataLoader，守护进程不能再开子进程
             batch_size=32
         )
         
         redis_client.hset(f'task:{task_id}', mapping={
             'status': 'SUCCESS',
             'progress': 100,
-            'result': str(result)
+            'result': json.dumps(result.model_dump())  # 改这里
         })
         
-        return {'success': True, 'data': result}
+        return {'success': True, 'data': result.model_dump()}
         
     except Exception as e:
         redis_client.hset(f'task:{task_id}', mapping={

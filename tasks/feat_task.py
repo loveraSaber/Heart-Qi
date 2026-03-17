@@ -27,11 +27,12 @@ def feat_detect_task(self, input_path: str, output_path: str, task_id: str):
         redis_client.hset(f'task:{task_id}', 'progress', 50)
         
         feat_detector = ModelRegistry.get('Feat')
+        #Celery worker 是守护进程，detect_video 里用了 num_workers=4 开多进程 DataLoader，守护进程不能再开子进程
         result = feat_detector.detect_video(
             input_path=input_path,
             output_path=output_dir,
             skip_frames=5,
-            num_workers=4,
+            num_workers=0,
             batch_size=32
         )
         

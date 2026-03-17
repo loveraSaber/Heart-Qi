@@ -32,43 +32,44 @@ RUN pip install --no-cache-dir \
     --timeout 600 \
     -r requirements-slim.txt
 
-# ── 4. 安装 PyTorch CPU ────────────────────────────────────────
-# 阿里云为主源，官方 whl 兜底
+# ── 4. 安装 PyTorch GPU (CUDA 11.8) ───────────────────────────
 RUN pip install --no-cache-dir \
     --retries 5 \
     --timeout 1000 \
     --trusted-host mirrors.aliyun.com \
     --trusted-host download.pytorch.org \
     -i https://mirrors.aliyun.com/pypi/simple/ \
-    --extra-index-url https://download.pytorch.org/whl/cpu \
-    torch==2.1.1+cpu \
-    torchvision==0.16.1+cpu
+    --extra-index-url https://download.pytorch.org/whl/cu118 \
+    torch==2.1.1+cu118 \
+    torchvision==0.16.1+cu118
+
+# ── 5. 安装 flower ─────────────────────────────────────────────
 RUN pip install --no-cache-dir flower==2.0.1
-# ── 5. 安装 transformers + opencv ─────────────────────────────
+
+# ── 6. 安装 transformers + opencv ─────────────────────────────
 RUN pip install --no-cache-dir \
     --retries 5 \
     --timeout 600 \
     transformers==4.35.0 \
     opencv-python-headless==4.8.1.78
 
-# ── 6. 安装可选深度学习依赖 ────────────────────────────────────
-# 这两个包依赖复杂，单独一层，失败可单独排查
+# ── 7. 安装可选深度学习依赖 ────────────────────────────────────
 RUN pip install --no-cache-dir \
     --retries 3 \
     --timeout 600 \
     batch-face==1.5.0 \
     py-feat==0.6.2
-# 强制修复 opencv，防止被上面的包覆盖为普通版
+
+# ── 8. 强制修复版本，防止被覆盖 ───────────────────────────────
 RUN pip install --no-cache-dir --force-reinstall \
-    opencv-python-headless==4.8.1.78
-#   强制固定 numpy 版本，防止被其他包覆盖 ──────────────────
-RUN pip install --no-cache-dir --force-reinstall \
+    opencv-python-headless==4.8.1.78 \
     numpy==1.24.3 \
     scipy==1.11.4
-# ── 7. 复制项目代码（最后一步，保护前面的缓存层）──────────────
+RUN pip install --no-cache-dir omegaconf
+# ── 9. 复制项目代码 ────────────────────────────────────────────
 COPY . .
 
-# ── 8. 启动 ───────────────────────────────────────────────────
+# ── 10. 启动 ──────────────────────────────────────────────────
 EXPOSE 9096
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

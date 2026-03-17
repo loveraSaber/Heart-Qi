@@ -27,3 +27,39 @@ celery_app.conf.update(
     task_track_started=True,
     task_time_limit=3600,
 )
+from celery.signals import worker_process_init
+
+@worker_process_init.connect
+def load_models(sender, **kwargs):
+    from app.models.feat_detector import FeatDetector
+    from app.models.registry import ModelRegistry
+    print("Worker process loading models...")
+    try:
+        feat_detector = FeatDetector()
+        ModelRegistry.register("Feat", feat_detector)
+        print("Worker process models loaded successfully.")
+    except Exception as e:
+        print(f"Worker process model loading failed: {e}")
+@worker_process_init.connect
+def load_models(sender, **kwargs):
+    from app.models.feat_detector import FeatDetector
+    from app.models.model_factory import ModelFactory
+    from app.models.registry import ModelRegistry
+    print("Worker process loading models...")
+    try:
+        feat_detector = FeatDetector()
+        ModelRegistry.register("Feat", feat_detector)
+
+        preprocess = ModelFactory.create_model('Preprocess')
+        cpss = ModelFactory.create_model('CPSS')
+        phq = ModelFactory.create_model('PHQ')
+        stai = ModelFactory.create_model('STAI')
+
+        ModelRegistry.register('preprocess', preprocess)
+        ModelRegistry.register('CPSS', cpss)
+        ModelRegistry.register('PHQ', phq)
+        ModelRegistry.register('STAI', stai)
+
+        print("Worker process models loaded successfully.")
+    except Exception as e:
+        print(f"Worker process model loading failed: {e}")

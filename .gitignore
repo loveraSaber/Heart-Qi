@@ -5,3 +5,4 @@ SETUP.md
 TEST_GUIDE.md
 README.md
 __pycache__/
+src/feat_model_ckpt/feat/feat_detectors/resources/

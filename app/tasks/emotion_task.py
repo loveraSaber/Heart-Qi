@@ -3,7 +3,7 @@ from celery import current_task
 from app.core.celery_app import celery_app
 from app.models.registry import ModelRegistry
 import redis
-
+import json
 # 从环境变量读取Redis配置，支持Docker容器
 redis_host = os.getenv('REDIS_HOST', 'localhost')
 redis_port = int(os.getenv('REDIS_PORT', '6379'))
@@ -59,7 +59,7 @@ def emotion_detect_task(self, input_path: str, output_path: str, task_id: str):
         redis_client.hset(f'task:{task_id}', mapping={
             'status': 'SUCCESS',
             'progress': 100,
-            'result': str(result)
+            'result': json.dumps(result)
         })
         
         return {'success': True, 'data': result}

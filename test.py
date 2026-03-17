@@ -10,10 +10,10 @@ async def test():
     # 第一步：提交任务
     async with httpx.AsyncClient() as client:
         resp = await client.post(
-            f"{SERVER}/systems/emotion_detect",
+            f"{SERVER}/systems/feat_detect",
             json={
-                "input_path": "/path/to/your/video.mp4",
-                "output_path": "/path/to/output/"
+                "input_path": "/app/data/video.mp4",
+                "output_path": "/app/output"
             }
         )
         data = resp.json()

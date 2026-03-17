@@ -23,15 +23,19 @@ class FeatDetector():
             self.detector = None
             print("Warning: Detector not available. FeatDetector will not work.")
         else:
-            self.detector = Detector(
-                face_model=FeatConfig.face_model, 
-                landmark_model=FeatConfig.landmark_model, 
-                au_model=FeatConfig.au_model, 
-                emotion_model=FeatConfig.emotion_model, 
-                facepose_model=FeatConfig.facepose_model, 
-                identity_model=FeatConfig.identity_model, 
-                device=FeatConfig.device
-            )
+            try:
+                self.detector = Detector(
+                    face_model=FeatConfig.face_model, 
+                    landmark_model=FeatConfig.landmark_model, 
+                    au_model=FeatConfig.au_model, 
+                    emotion_model=FeatConfig.emotion_model, 
+                    facepose_model=FeatConfig.facepose_model, 
+                    identity_model=FeatConfig.identity_model, 
+                    device=FeatConfig.device
+                )
+            except Exception as e:
+                self.detector = None
+                print(f"Warning: FeatDetector init failed: {e}")
         self.basic_emotion = FeatConfig.basic_emotion
         self.netral_idx = AnalysisConfig.neutral_idx
         self.baseline = AnalysisConfig.baseline

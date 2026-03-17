@@ -6,7 +6,7 @@ services:
     image: redis:7-alpine
     container_name: visualmodel_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
@@ -26,7 +26,7 @@ services:
       dockerfile: Dockerfile
     container_name: visualmodel_api
     ports:
-      - "9096:9096"
+      - "9097:9096"
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -36,20 +36,29 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    # volumes:
-    #   - ./src/model_ckpt:/app/src/model_ckpt:ro
-    #   - ./src/vit-base-patch16-224:/app/src/vit-base-patch16-224:ro
-    #   - ./app:/app/app:ro
+    volumes:
+      - ./src/model_ckpt:/app/src/model_ckpt:ro
+      - ./src:/app/src:ro
+      - ./src/vit-base-patch16-224:/app/src/vit-base-patch16-224:ro
+      - ./src/feat_model_ckpt/feat/feat_detectors:/usr/local/lib/python3.10/site-packages/feat
+      - ./app:/app/app:ro
+      - ~/.cache/torch:/root/.cache/torch
+      - /home/testenv/project/data:/app/data:ro
+      - /home/testenv/project/output:/app/output
     deploy:
       resources:
         limits:
+          cpus: '4'
+          memory: 16G
+        reservations:
           cpus: '2'
           memory: 8G
-        reservations:
-          cpus: '1'
-          memory: 4G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9096/docs"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9096/docs')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -65,6 +74,7 @@ services:
       dockerfile: Dockerfile
     container_name: visualmodel_celery_worker
     environment:
+      - PYTHONPATH=/app
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_DB_BROKER=0
@@ -75,22 +85,31 @@ services:
         condition: service_healthy
     volumes:
       - ./src/model_ckpt:/app/src/model_ckpt:ro
+      - ./src:/app/src:ro
       - ./src/vit-base-patch16-224:/app/src/vit-base-patch16-224:ro
-      #- ./app:/app/app:ro
+      - ./src/feat_model_ckpt/feat/feat_detectors:/usr/local/lib/python3.10/site-packages/feat
+      - ./app:/app/app:ro
+      - ~/.cache/torch:/root/.cache/torch
+      - /home/testenv/project/data:/app/data:ro
+      - /home/testenv/project/output:/app/output
     deploy:
       resources:
         limits:
+          cpus: '4'
+          memory: 16G
+        reservations:
           cpus: '2'
           memory: 8G
-        reservations:
-          cpus: '1'
-          memory: 4G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     command: ["celery", "-A", "app.core.celery_app", "worker", "--loglevel=info", "--concurrency=2", "--prefetch-multiplier=1"]
     restart: unless-stopped
     networks:
       - visualmodel_network
 
-  # Celery Flower (监控面板)
+  # Celery Flower 监控面板
   flower:
     build:
       context: .
@@ -104,9 +123,19 @@ services:
       - REDIS_DB_BROKER=0
       - REDIS_DB_BACKEND=1
     depends_on:
-      - redis
-      - celery_worker
-    command: ["celery", "-A", "app.core.celery_app", "flower", "--port=5555", "--broker=redis://redis:6379/0"]
+      redis:
+        condition: service_healthy
+      celery_worker:
+        condition: service_started
+    command: ["celery", "-A", "app.core.celery_app", "flower", "--port=5555", "--broker=redis://${REDIS_HOST}:${REDIS_PORT}/${REDIS_DB_BROKER}"]
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
     restart: unless-stopped
     networks:
       - visualmodel_network
