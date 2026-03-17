@@ -6,7 +6,7 @@ from app.core.celery_app import celery_app
 import uuid
 import redis
 import os
-emotionController = APIRouter(prefix='/systems')
+featController = APIRouter(prefix='/systems')
 # 从环境变量读取Redis配置，支持Docker容器
 redis_host = os.getenv('REDIS_HOST', 'localhost')
 redis_port = int(os.getenv('REDIS_PORT', '6379'))

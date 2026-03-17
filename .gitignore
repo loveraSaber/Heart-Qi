@@ -4,3 +4,4 @@ src/vit-base-patch16-224/
 SETUP.md
 TEST_GUIDE.md
 README.md
+__pycache__/
